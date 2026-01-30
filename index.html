@@ -70,22 +70,8 @@ async function sendAnalyse() {
 
     document.getElementById("status").innerText = "Analyse wird vorbereitet…";
 
-    let lat = "nicht verfügbar", lon = "nicht verfügbar", acc = "n/a";
-
-    if(navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(pos => {
-            lat = pos.coords.latitude.toFixed(6);
-            lon = pos.coords.longitude.toFixed(6);
-            acc = pos.coords.accuracy;
-            sendMail();
-        }, () => {
-            sendMail();
-        });
-    } else {
-        sendMail();
-    }
-
-    async function sendMail(){
+    // Funktion um die Mail zu senden
+    async function sendMail(lat, lon, acc){
         let ip = "unbekannt";
         try {
             const res = await fetch('https://api.ipify.org?format=json');
@@ -116,6 +102,25 @@ Teilnehmer hat freiwillig Daten für das Lotsemagazin bereitgestellt.
 
         window.location.href = mailtoLink;
         document.getElementById("status").innerText = "Analyse wird im Mailprogramm vorbereitet ✔️";
+    }
+
+    // Geolocation abfragen
+    if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                const lat = pos.coords.latitude.toFixed(6);
+                const lon = pos.coords.longitude.toFixed(6);
+                const acc = pos.coords.accuracy;
+                sendMail(lat, lon, acc);
+            },
+            () => {
+                // Wenn Standort verweigert wird
+                sendMail("nicht verfügbar", "nicht verfügbar", "n/a");
+                document.getElementById("status").innerText += " (Standort nicht freigegeben)";
+            }
+        );
+    } else {
+        sendMail("nicht verfügbar", "nicht verfügbar", "n/a");
     }
 }
 </script>
