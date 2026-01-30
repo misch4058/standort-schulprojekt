@@ -12,6 +12,8 @@
         }
         img {
             margin-top: 20px;
+            width: 250px; /* QR-Code Größe */
+            height: 250px;
         }
     </style>
 </head>
@@ -20,15 +22,8 @@
 <h1>📱 QR-Code zur Webseite</h1>
 <p>Scanne den QR-Code, um direkt auf die Schulprojekt-Webseite zu gelangen:</p>
 
-<img id="qrImage" src="" alt="QR-Code">
-
-<script>
-const url = "https://misch4058.github.io/standort-schulprojekt/";
-
-// QR-Code über Google Chart API erzeugen
-document.getElementById("qrImage").src =
-    "https://chart.googleapis.com/chart?cht=qr&chl=" + encodeURIComponent(url) + "&chs=250x250&chld=L|1";
-</script>
+<!-- QR-Code Bild -->
+<img src="https://chart.googleapis.com/chart?cht=qr&chl=https%3A%2F%2Fmisch4058.github.io%2Fstandort-schulprojekt%2F&chs=250x250&chld=L|1" alt="QR-Code">
 
 </body>
 </html>
