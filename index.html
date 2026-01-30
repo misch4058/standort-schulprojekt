@@ -1,87 +1,129 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <title>Standort per E-Mail senden</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 40px;
-            background: #f0f0f0;
-        }
-        button, a {
-            padding: 12px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            display: inline-block;
-            margin-top: 10px;
-            text-decoration: none;
-            color: white;
-            background-color: #007bff;
-            border-radius: 5px;
-        }
-        #info {
-            margin-top: 20px;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Schulprojekt Analyse</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f0f0f0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+}
+.box{
+    background:white;
+    padding:40px;
+    border-radius:12px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+    max-width:600px;
+    text-align:center;
+}
+input, button{
+    padding:12px;
+    font-size:16px;
+    margin-top:10px;
+    width:80%;
+}
+button{
+    background:#007bff;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+#status{
+    margin-top:20px;
+    font-size:15px;
+}
+.small{
+    font-size:13px;
+    color:#555;
+}
+</style>
 </head>
+
 <body>
 
-<h1>📍 Standort senden (Schulprojekt)</h1>
-<p>Der Standort wird nur mit Zustimmung erfasst und per E-Mail gesendet.</p>
+<div class="box">
 
-<button onclick="getLocation()">Standort erfassen & E-Mail senden</button>
-<br>
-<a href="qr.html" target="_blank">QR-Code anzeigen</a>
+<h2>Vielen Dank für die Unterstützung</h2>
+<p><strong>der Ersteller des Lotsemagazin</strong></p>
 
-<div id="info"></div>
+<hr>
+
+<p>Schulprojekt – Standortanalyse</p>
+
+<input type="text" id="name" placeholder="Dein Name (freiwillig)">
+
+<p class="small">
+Mit Klick auf „Analyse senden“ erklärst du dich einverstanden,<br>
+dass dein Standort und Name für das Schulprojekt verwendet werden.
+</p>
+
+<button onclick="startAnalyse()">Analyse senden</button>
+
+<div id="status"></div>
+
+</div>
 
 <script>
-const url = "https://misch4058.github.io/standort-schulprojekt/";
+function startAnalyse(){
+    const name = document.getElementById("name").value || "Anonym";
 
-function getLocation() {
-    if (!navigator.geolocation) {
-        document.getElementById("info").innerText =
-            "Geolocation wird nicht unterstützt.";
+    if(!navigator.geolocation){
+        document.getElementById("status").innerText =
+        "Geolocation wird nicht unterstützt.";
         return;
     }
 
-    navigator.geolocation.getCurrentPosition(success, error);
+    navigator.geolocation.getCurrentPosition(
+        pos => success(pos,name),
+        error
+    );
 }
 
-function success(position) {
+function success(position,name){
     const lat = position.coords.latitude;
     const lon = position.coords.longitude;
-    const accuracy = position.coords.accuracy;
-    const time = new Date(position.timestamp);
+    const acc = position.coords.accuracy;
+    const time = new Date().toLocaleString();
 
     const body = `
-Standortdaten (Schulprojekt)
+Schulprojekt Standortanalyse
 
+Name: ${name}
+
+Ort:
 Breitengrad: ${lat}
 Längengrad: ${lon}
-Genauigkeit: ±${accuracy} Meter
-Zeitpunkt: ${time}
+Genauigkeit: ±${acc} Meter
+Zeit: ${time}
 
 Google Maps:
 https://www.google.com/maps?q=${lat},${lon}
+
+Analyse:
+Teilnehmer hat freiwillig Standortdaten für Schulprojekt bereitgestellt.
     `;
 
-    const mailtoLink =
-        "mailto:mschoepfer@lotsebasel.onmicrosoft.com" +
-        "?subject=Standortdaten%20Schulprojekt" +
-        "&body=" + encodeURIComponent(body);
+    const mail =
+    "mailto:mschoepfer@lotsebasel.onmicrosoft.com" +
+    "?subject=Schulprojekt Standortanalyse" +
+    "&body=" + encodeURIComponent(body);
 
-    window.location.href = mailtoLink;
+    window.location.href = mail;
 
-    document.getElementById("info").innerHTML =
-        "E-Mail wird vorbereitet…";
+    document.getElementById("status").innerHTML =
+    "Analyse wird vorbereitet und per E-Mail geöffnet ✔️";
 }
 
-function error() {
-    document.getElementById("info").innerText =
-        "Standort wurde nicht freigegeben.";
+function error(){
+    document.getElementById("status").innerText =
+    "Standortfreigabe abgelehnt.";
 }
 </script>
 
