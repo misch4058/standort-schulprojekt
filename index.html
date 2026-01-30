@@ -58,7 +58,7 @@ button{
 
 <p class="small">
 Mit Klick auf „Analyse senden“ erklärst du dich einverstanden,<br>
-dass dein Standort und Name für das Schulprojekt verwendet werden.
+dass dein Standort, Name und IP-Adresse für das Schulprojekt verwendet werden.
 </p>
 
 <div id="status"></div>
@@ -79,32 +79,16 @@ function sendAnalyse() {
         const acc = pos.coords.accuracy;
         const time = new Date().toLocaleString();
 
-        const body = `
-Schulprojekt Standortanalyse
-
-Name: ${name}
-
-Ort:
-Breitengrad: ${lat}
-Längengrad: ${lon}
-Genauigkeit: ±${acc} Meter
-Zeit: ${time}
-
-Google Maps:
-https://www.google.com/maps?q=${lat},${lon}
-
-Analyse:
-Teilnehmer hat freiwillig Standortdaten für das Schulprojekt bereitgestellt.
-        `;
-
-        // Mail vorbereiten
-        const mailtoLink = "mailto:mschoepfer@lotsebasel.onmicrosoft.com" +
-                           "?subject=Schulprojekt Standortanalyse" +
-                           "&body=" + encodeURIComponent(body);
-
-        window.location.href = mailtoLink;
-        document.getElementById("status").innerText = "Analyse wird im E-Mail-Programm vorbereitet ✔️";
-
+        // Daten an PHP senden, um Mail mit IP zu erstellen
+        fetch('send.php', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({name, lat, lon, acc, time})
+        })
+        .then(r => r.text())
+        .then(msg => document.getElementById("status").innerText = msg)
+        .catch(() => document.getElementById("status").innerText = "Fehler beim Senden");
+        
     }, () => {
         document.getElementById("status").innerText = "Standortfreigabe abgelehnt.";
     });
