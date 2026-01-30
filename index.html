@@ -15,10 +15,10 @@ body{
 }
 .box{
     background:white;
-    padding:30px 40px;
+    padding:40px;
     border-radius:12px;
     box-shadow:0 0 10px rgba(0,0,0,0.1);
-    max-width:500px;
+    max-width:600px;
     text-align:center;
 }
 input, button, textarea{
@@ -59,9 +59,12 @@ label{
 <body>
 
 <div class="box">
+
 <h2>Vielen Dank für die Unterstützung</h2>
 <p><strong>der Ersteller des Lotsemagazin</strong></p>
+
 <hr>
+
 <p>Schulprojekt – Standortanalyse</p>
 
 <input type="text" id="name" placeholder="Dein Name (freiwillig)">
@@ -70,9 +73,8 @@ label{
 AGB / Datenschutzerklärung:
 
 - Mit dem Klick auf „Analyse senden“ erklärst du dich einverstanden,
-  dass dein Name, Standort und IP-Adresse für das Schulprojekt verwendet werden.
-- Deine Daten werden ausschließlich für das Schulprojekt gespeichert und
-  nicht an Dritte weitergegeben.
+  dass dein Name und Standort für das Schulprojekt verwendet werden.
+- Die Daten werden ausschließlich für das Schulprojekt genutzt.
 - Teilnahme ist freiwillig.
 </textarea>
 
@@ -84,6 +86,7 @@ Ich akzeptiere die AGB / Datenschutzerklärung
 <button onclick="sendAnalyse()">Analyse senden</button>
 
 <div id="status"></div>
+
 </div>
 
 <script>
@@ -96,26 +99,41 @@ function sendAnalyse() {
         return;
     }
 
-    if (!navigator.geolocation) {
+    if(!navigator.geolocation){
         document.getElementById("status").innerText = "Geolocation wird nicht unterstützt.";
         return;
     }
 
     navigator.geolocation.getCurrentPosition(pos => {
-        const lat = pos.coords.latitude.toFixed(6);
-        const lon = pos.coords.longitude.toFixed(6);
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
         const acc = pos.coords.accuracy;
         const time = new Date().toLocaleString();
 
-        // Daten an PHP senden
-        fetch('send.php', {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({name, lat, lon, acc, time})
-        })
-        .then(r => r.text())
-        .then(msg => document.getElementById("status").innerText = msg)
-        .catch(() => document.getElementById("status").innerText = "Fehler beim Senden");
+        const body = `
+Schulprojekt Standortanalyse
+
+Name: ${name}
+
+Ort:
+Breitengrad: ${lat}
+Längengrad: ${lon}
+Genauigkeit: ±${acc} Meter
+Zeit: ${time}
+
+Google Maps:
+https://www.google.com/maps?q=${lat},${lon}
+
+Analyse:
+Teilnehmer hat freiwillig Standortdaten für Schulprojekt bereitgestellt.
+        `;
+
+        const mailtoLink = "mailto:mschoepfer@lotsebasel.onmicrosoft.com" +
+                           "?subject=Schulprojekt Standortanalyse" +
+                           "&body=" + encodeURIComponent(body);
+
+        window.location.href = mailtoLink;
+        document.getElementById("status").innerText = "Analyse wird im E-Mail-Programm vorbereitet ✔️";
 
     }, () => {
         document.getElementById("status").innerText = "Standortfreigabe abgelehnt.";
