@@ -3,71 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <title>Lotsemagazin Analyse</title>
-<style>
-body{
-    font-family: Arial, sans-serif;
-    background:#f0f0f0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    margin:0;
-}
-.box{
-    background:white;
-    padding:30px 40px;
-    border-radius:12px;
-    box-shadow:0 0 10px rgba(0,0,0,0.1);
-    max-width:500px;
-    text-align:center;
-}
-input, button, textarea, select{
-    padding:12px;
-    font-size:16px;
-    margin-top:10px;
-    width:80%;
-}
-textarea{
-    resize:none;
-    height:120px;
-}
-button{
-    background:#007bff;
-    color:white;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-}
-#status{
-    margin-top:20px;
-    font-size:15px;
-    color:green;
-}
-label{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-    font-size:14px;
-}
-</style>
 </head>
 <body>
-
-<div class="box">
 
 <h2>Vielen Dank für die Unterstützung</h2>
 <p><strong>der Ersteller des Lotsemagazin</strong></p>
 
 <hr>
 
-<p>Lotsemagazin – Standortanalyse</p>
+<p>Lotsemagazin – Analyse</p>
 
-<input type="text" id="name" placeholder="Dein Name (freiwillig)">
+<input type="text" id="name" placeholder="Dein Name (freiwillig)"><br><br>
 
-<!-- Feedback zuerst -->
-<label for="feedback">
-Dein Feedback (obligatorisch):
+<label>
+Feedback (obligatorisch):
 <select id="feedback">
     <option value="">Bitte wählen</option>
     <option value="😍">😍 Sehr gut</option>
@@ -77,28 +26,31 @@ Dein Feedback (obligatorisch):
     <option value="😞">😞 Schlecht</option>
     <option value="😡">😡 Sehr schlecht</option>
 </select>
-</label>
+</label><br><br>
 
-<!-- AGB danach -->
-<textarea readonly>
-AGB / Datenschutzerklärung:
+<!-- Vollständige AGB -->
+<textarea readonly rows="10" style="width:80%;">
+AGB / Datenschutzerklärung für das Lotsemagazin:
 
-- Mit Klick auf „Analyse senden“ erklärst du dich einverstanden,
-  dass dein Name, Feedback, Standort und IP-Adresse für das Lotsemagazin verwendet werden.
-- Die Daten werden ausschließlich für das Lotsemagazin genutzt.
-- Teilnahme ist freiwillig.
-</textarea>
+1. Mit Klick auf „Analyse senden“ erklärst du dich einverstanden, dass dein Name, Feedback, Standort (sofern freigegeben) und IP-Adresse für das Lotsemagazin verwendet werden.
+
+2. Die erhobenen Daten dienen ausschließlich der Analyse und Verbesserung des Lotsemagazins und werden nicht an Dritte weitergegeben.
+
+3. Die Teilnahme ist freiwillig. Du kannst jederzeit den Standortzugriff verweigern oder die Teilnahme abbrechen.
+
+4. Die gespeicherten Daten werden nach Abschluss der Auswertung gelöscht, sofern keine gesetzliche Aufbewahrungspflicht besteht.
+
+5. Mit der Zustimmung bestätigst du, dass du die AGB gelesen und verstanden hast.
+</textarea><br>
 
 <label>
 <input type="checkbox" id="agb">
 Ich akzeptiere die AGB / Datenschutzerklärung
-</label>
+</label><br><br>
 
 <button onclick="sendAnalyse()">Analyse senden</button>
 
-<div id="status"></div>
-
-</div>
+<p id="status"></p>
 
 <script>
 async function sendAnalyse() {
@@ -116,31 +68,33 @@ async function sendAnalyse() {
         return;
     }
 
-    if(!navigator.geolocation){
-        document.getElementById("status").innerText = "Geolocation wird nicht unterstützt.";
-        return;
-    }
-
     document.getElementById("status").innerText = "Analyse wird vorbereitet…";
 
-    navigator.geolocation.getCurrentPosition(async pos => {
-        const lat = pos.coords.latitude.toFixed(6);
-        const lon = pos.coords.longitude.toFixed(6);
-        const acc = pos.coords.accuracy;
-        const time = new Date().toLocaleString();
+    let lat = "nicht verfügbar", lon = "nicht verfügbar", acc = "n/a";
 
-        // IP-Adresse über öffentliche API abrufen
-        let ip = "Unbekannt";
+    if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(pos => {
+            lat = pos.coords.latitude.toFixed(6);
+            lon = pos.coords.longitude.toFixed(6);
+            acc = pos.coords.accuracy;
+            sendMail();
+        }, () => {
+            sendMail();
+        });
+    } else {
+        sendMail();
+    }
+
+    async function sendMail(){
+        let ip = "unbekannt";
         try {
             const res = await fetch('https://api.ipify.org?format=json');
             const data = await res.json();
             ip = data.ip;
-        } catch (e) {
-            console.log("IP konnte nicht ermittelt werden.");
-        }
+        } catch {}
 
         const body = `
-Lotsemagazin Standortanalyse
+Lotsemagazin Analyse
 
 Name: ${name}
 Feedback: ${feedback}
@@ -150,25 +104,19 @@ Ort:
 Breitengrad: ${lat}
 Längengrad: ${lon}
 Genauigkeit: ±${acc} Meter
-Zeit: ${time}
-
-Google Maps:
-https://www.google.com/maps?q=${lat},${lon}
+Zeit: ${new Date().toLocaleString()}
 
 Analyse:
-Teilnehmer hat freiwillig Standortdaten für das Lotsemagazin bereitgestellt.
+Teilnehmer hat freiwillig Daten für das Lotsemagazin bereitgestellt.
         `;
 
         const mailtoLink = "mailto:mschoepfer@lotsebasel.onmicrosoft.com" +
-                           "?subject=Lotsemagazin Standortanalyse" +
+                           "?subject=Lotsemagazin Analyse" +
                            "&body=" + encodeURIComponent(body);
 
         window.location.href = mailtoLink;
-        document.getElementById("status").innerText = "Analyse wird im E-Mail-Programm vorbereitet ✔️";
-
-    }, () => {
-        document.getElementById("status").innerText = "Standortfreigabe abgelehnt.";
-    });
+        document.getElementById("status").innerText = "Analyse wird im Mailprogramm vorbereitet ✔️";
+    }
 }
 </script>
 
