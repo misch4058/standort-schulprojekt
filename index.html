@@ -15,17 +15,21 @@ body{
 }
 .box{
     background:white;
-    padding:40px;
+    padding:30px 40px;
     border-radius:12px;
     box-shadow:0 0 10px rgba(0,0,0,0.1);
     max-width:500px;
     text-align:center;
 }
-input, button{
+input, button, textarea{
     padding:12px;
     font-size:16px;
     margin-top:10px;
     width:80%;
+}
+textarea{
+    resize:none;
+    height:120px;
 }
 button{
     background:#007bff;
@@ -43,6 +47,13 @@ button{
     font-size:13px;
     color:#555;
 }
+label{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    font-size:14px;
+}
 </style>
 </head>
 <body>
@@ -54,12 +65,23 @@ button{
 <p>Schulprojekt – Standortanalyse</p>
 
 <input type="text" id="name" placeholder="Dein Name (freiwillig)">
-<button onclick="sendAnalyse()">Analyse senden</button>
 
-<p class="small">
-Mit Klick auf „Analyse senden“ erklärst du dich einverstanden,<br>
-dass dein Standort, Name und IP-Adresse für das Schulprojekt verwendet werden.
-</p>
+<textarea readonly>
+AGB / Datenschutzerklärung:
+
+- Mit dem Klick auf „Analyse senden“ erklärst du dich einverstanden,
+  dass dein Name, Standort und IP-Adresse für das Schulprojekt verwendet werden.
+- Deine Daten werden ausschließlich für das Schulprojekt gespeichert und
+  nicht an Dritte weitergegeben.
+- Teilnahme ist freiwillig.
+</textarea>
+
+<label>
+<input type="checkbox" id="agb">
+Ich akzeptiere die AGB / Datenschutzerklärung
+</label>
+
+<button onclick="sendAnalyse()">Analyse senden</button>
 
 <div id="status"></div>
 </div>
@@ -67,6 +89,12 @@ dass dein Standort, Name und IP-Adresse für das Schulprojekt verwendet werden.
 <script>
 function sendAnalyse() {
     const name = document.getElementById("name").value || "Anonym";
+    const agbChecked = document.getElementById("agb").checked;
+
+    if(!agbChecked){
+        document.getElementById("status").innerText = "Bitte akzeptiere die AGB / Datenschutzerklärung.";
+        return;
+    }
 
     if (!navigator.geolocation) {
         document.getElementById("status").innerText = "Geolocation wird nicht unterstützt.";
@@ -79,7 +107,7 @@ function sendAnalyse() {
         const acc = pos.coords.accuracy;
         const time = new Date().toLocaleString();
 
-        // Daten an PHP senden, um Mail mit IP zu erstellen
+        // Daten an PHP senden
         fetch('send.php', {
             method: 'POST',
             headers: {'Content-Type':'application/json'},
@@ -88,7 +116,7 @@ function sendAnalyse() {
         .then(r => r.text())
         .then(msg => document.getElementById("status").innerText = msg)
         .catch(() => document.getElementById("status").innerText = "Fehler beim Senden");
-        
+
     }, () => {
         document.getElementById("status").innerText = "Standortfreigabe abgelehnt.";
     });
