@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>QR-Code zur Schulprojekt-Webseite</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 40px;
+            background: #f0f0f0;
+        }
+        img {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>📱 QR-Code zur Webseite</h1>
+<p>Scanne den QR-Code, um direkt auf die Schulprojekt-Webseite zu gelangen:</p>
+
+<img id="qrImage" src="" alt="QR-Code">
+
+<script>
+const url = "https://misch4058.github.io/standort-schulprojekt/";
+
+// QR-Code über Google Chart API erzeugen
+document.getElementById("qrImage").src =
+    "https://chart.googleapis.com/chart?cht=qr&chl=" + encodeURIComponent(url) + "&chs=250x250&chld=L|1";
+</script>
+
+</body>
+</html>
