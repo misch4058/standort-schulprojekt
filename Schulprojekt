@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Standort per E-Mail senden</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 40px;
+            background: #f0f0f0;
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #info {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>📍 Standort senden (Schulprojekt)</h1>
+<p>Der Standort wird nur mit Zustimmung erfasst und per E-Mail gesendet.</p>
+
+<button onclick="getLocation()">Standort erfassen & E-Mail senden</button>
+
+<div id="info"></div>
+
+<script>
+function getLocation() {
+    if (!navigator.geolocation) {
+        document.getElementById("info").innerText =
+            "Geolocation wird nicht unterstützt.";
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(success, error);
+}
+
+function success(position) {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+    const accuracy = position.coords.accuracy;
+    const time = new Date(position.timestamp);
+
+    const body = `
+Standortdaten (Schulprojekt)
+
+Breitengrad: ${lat}
+Längengrad: ${lon}
+Genauigkeit: ±${accuracy} Meter
+Zeitpunkt: ${time}
+
+Google Maps:
+https://www.google.com/maps?q=${lat},${lon}
+    `;
+
+    const mailtoLink =
+        "mailto:mschoepfer@lotsebasel.onmicrosoft.com" +
+        "?subject=Standortdaten%20Schulprojekt" +
+        "&body=" + encodeURIComponent(body);
+
+    window.location.href = mailtoLink;
+
+    document.getElementById("info").innerHTML =
+        "E-Mail wird vorbereitet…";
+}
+
+function error() {
+    document.getElementById("info").innerText =
+        "Standort wurde nicht freigegeben.";
+}
+</script>
+
+</body>
+</html>
