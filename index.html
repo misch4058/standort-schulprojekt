@@ -28,7 +28,6 @@ Feedback (obligatorisch):
 </select>
 </label><br><br>
 
-<!-- Vollständige AGB -->
 <textarea readonly rows="10" style="width:80%;">
 AGB / Datenschutzerklärung für das Lotsemagazin:
 
@@ -55,14 +54,13 @@ Ich akzeptiere die AGB / Datenschutzerklärung
 <script>
 async function sendAnalyse() {
     const name = document.getElementById("name").value || "Anonym";
-    const agbChecked = document.getElementById("agb").checked;
     const feedback = document.getElementById("feedback").value;
+    const agbChecked = document.getElementById("agb").checked;
 
     if(feedback === ""){
         document.getElementById("status").innerText = "Bitte wähle ein Feedback-Emoji aus.";
         return;
     }
-
     if(!agbChecked){
         document.getElementById("status").innerText = "Bitte akzeptiere die AGB / Datenschutzerklärung.";
         return;
@@ -70,8 +68,8 @@ async function sendAnalyse() {
 
     document.getElementById("status").innerText = "Analyse wird vorbereitet…";
 
-    // Funktion um die Mail zu senden
-    async function sendMail(lat, lon, acc){
+    // Funktion um Mail zu erstellen
+    async function sendMail(lat, lon, acc) {
         let ip = "unbekannt";
         try {
             const res = await fetch('https://api.ipify.org?format=json');
@@ -104,7 +102,7 @@ Teilnehmer hat freiwillig Daten für das Lotsemagazin bereitgestellt.
         document.getElementById("status").innerText = "Analyse wird im Mailprogramm vorbereitet ✔️";
     }
 
-    // Geolocation abfragen
+    // Standort abfragen
     if(navigator.geolocation){
         navigator.geolocation.getCurrentPosition(
             pos => {
@@ -114,7 +112,7 @@ Teilnehmer hat freiwillig Daten für das Lotsemagazin bereitgestellt.
                 sendMail(lat, lon, acc);
             },
             () => {
-                // Wenn Standort verweigert wird
+                // Wenn Nutzer Standort ablehnt
                 sendMail("nicht verfügbar", "nicht verfügbar", "n/a");
                 document.getElementById("status").innerText += " (Standort nicht freigegeben)";
             }
