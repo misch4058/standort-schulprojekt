@@ -43,10 +43,6 @@ button{
     font-size:15px;
     color:green;
 }
-.small{
-    font-size:13px;
-    color:#555;
-}
 label{
     display:flex;
     align-items:center;
@@ -88,7 +84,7 @@ Dein Feedback (obligatorisch):
 AGB / Datenschutzerklärung:
 
 - Mit Klick auf „Analyse senden“ erklärst du dich einverstanden,
-  dass dein Name und Standort für das Lotsemagazin verwendet werden.
+  dass dein Name, Feedback, Standort und IP-Adresse für das Lotsemagazin verwendet werden.
 - Die Daten werden ausschließlich für das Lotsemagazin genutzt.
 - Teilnahme ist freiwillig.
 </textarea>
@@ -105,7 +101,7 @@ Ich akzeptiere die AGB / Datenschutzerklärung
 </div>
 
 <script>
-function sendAnalyse() {
+async function sendAnalyse() {
     const name = document.getElementById("name").value || "Anonym";
     const agbChecked = document.getElementById("agb").checked;
     const feedback = document.getElementById("feedback").value;
@@ -125,17 +121,30 @@ function sendAnalyse() {
         return;
     }
 
-    navigator.geolocation.getCurrentPosition(pos => {
+    document.getElementById("status").innerText = "Analyse wird vorbereitet…";
+
+    navigator.geolocation.getCurrentPosition(async pos => {
         const lat = pos.coords.latitude.toFixed(6);
         const lon = pos.coords.longitude.toFixed(6);
         const acc = pos.coords.accuracy;
         const time = new Date().toLocaleString();
+
+        // IP-Adresse über öffentliche API abrufen
+        let ip = "Unbekannt";
+        try {
+            const res = await fetch('https://api.ipify.org?format=json');
+            const data = await res.json();
+            ip = data.ip;
+        } catch (e) {
+            console.log("IP konnte nicht ermittelt werden.");
+        }
 
         const body = `
 Lotsemagazin Standortanalyse
 
 Name: ${name}
 Feedback: ${feedback}
+IP-Adresse: ${ip}
 
 Ort:
 Breitengrad: ${lat}
@@ -147,7 +156,7 @@ Google Maps:
 https://www.google.com/maps?q=${lat},${lon}
 
 Analyse:
-Teilnehmer hat freiwillig Standortdaten bereitgestellt.
+Teilnehmer hat freiwillig Standortdaten für das Lotsemagazin bereitgestellt.
         `;
 
         const mailtoLink = "mailto:mschoepfer@lotsebasel.onmicrosoft.com" +
