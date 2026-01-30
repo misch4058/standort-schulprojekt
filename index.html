@@ -10,10 +10,16 @@
             padding: 40px;
             background: #f0f0f0;
         }
-        button {
+        button, a {
             padding: 12px 20px;
             font-size: 16px;
             cursor: pointer;
+            display: inline-block;
+            margin-top: 10px;
+            text-decoration: none;
+            color: white;
+            background-color: #007bff;
+            border-radius: 5px;
         }
         #info {
             margin-top: 20px;
@@ -26,10 +32,14 @@
 <p>Der Standort wird nur mit Zustimmung erfasst und per E-Mail gesendet.</p>
 
 <button onclick="getLocation()">Standort erfassen & E-Mail senden</button>
+<br>
+<a href="qr.html" target="_blank">QR-Code anzeigen</a>
 
 <div id="info"></div>
 
 <script>
+const url = "https://misch4058.github.io/standort-schulprojekt/";
+
 function getLocation() {
     if (!navigator.geolocation) {
         document.getElementById("info").innerText =
