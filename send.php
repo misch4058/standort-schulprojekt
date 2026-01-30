@@ -9,7 +9,6 @@ $lon  = $data['lon'] ?? '';
 $acc  = $data['acc'] ?? '';
 $time = $data['time'] ?? '';
 
-// IP-Adresse des Nutzers ermitteln
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'Unbekannt';
 
 $to = 'mschoepfer@lotsebasel.onmicrosoft.com';
