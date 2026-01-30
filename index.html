@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Lotsemagazin Analyse</title>
+<title>Schulprojekt Analyse</title>
 <style>
 body{
     font-family: Arial, sans-serif;
@@ -15,13 +15,13 @@ body{
 }
 .box{
     background:white;
-    padding:40px;
+    padding:30px 40px;
     border-radius:12px;
     box-shadow:0 0 10px rgba(0,0,0,0.1);
-    max-width:600px;
+    max-width:500px;
     text-align:center;
 }
-input, button, textarea{
+input, button, textarea, select{
     padding:12px;
     font-size:16px;
     margin-top:10px;
@@ -29,7 +29,7 @@ input, button, textarea{
 }
 textarea{
     resize:none;
-    height:120px;
+    height:100px;
 }
 button{
     background:#007bff;
@@ -65,22 +65,32 @@ label{
 
 <hr>
 
-<p>Lotsemagazin – Standortanalyse</p>
+<p>Schulprojekt – Standortanalyse</p>
 
 <input type="text" id="name" placeholder="Dein Name (freiwillig)">
 
 <textarea readonly>
 AGB / Datenschutzerklärung:
 
-- Mit dem Klick auf „Analyse senden“ erklärst du dich einverstanden,
-  dass dein Name und Standort für das Lotsemagazin verwendet werden.
-- Die Daten werden ausschließlich für das Lotsemagazin genutzt.
+- Mit Klick auf „Analyse senden“ erklärst du dich einverstanden,
+  dass dein Name und Standort für das Schulprojekt verwendet werden.
+- Die Daten werden ausschließlich für das Schulprojekt genutzt.
 - Teilnahme ist freiwillig.
 </textarea>
 
 <label>
 <input type="checkbox" id="agb">
 Ich akzeptiere die AGB / Datenschutzerklärung
+</label>
+
+<label for="feedback">
+Dein Feedback (obligatorisch):
+<select id="feedback">
+    <option value="">Bitte wählen</option>
+    <option value="😊">😊 Gut</option>
+    <option value="😐">😐 Neutral</option>
+    <option value="😞">😞 Schlecht</option>
+</select>
 </label>
 
 <button onclick="sendAnalyse()">Analyse senden</button>
@@ -93,9 +103,15 @@ Ich akzeptiere die AGB / Datenschutzerklärung
 function sendAnalyse() {
     const name = document.getElementById("name").value || "Anonym";
     const agbChecked = document.getElementById("agb").checked;
+    const feedback = document.getElementById("feedback").value;
 
     if(!agbChecked){
         document.getElementById("status").innerText = "Bitte akzeptiere die AGB / Datenschutzerklärung.";
+        return;
+    }
+
+    if(feedback === ""){
+        document.getElementById("status").innerText = "Bitte wähle ein Feedback-Emoji aus.";
         return;
     }
 
@@ -105,8 +121,8 @@ function sendAnalyse() {
     }
 
     navigator.geolocation.getCurrentPosition(pos => {
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
+        const lat = pos.coords.latitude.toFixed(6);
+        const lon = pos.coords.longitude.toFixed(6);
         const acc = pos.coords.accuracy;
         const time = new Date().toLocaleString();
 
@@ -114,6 +130,7 @@ function sendAnalyse() {
 Schulprojekt Standortanalyse
 
 Name: ${name}
+Feedback: ${feedback}
 
 Ort:
 Breitengrad: ${lat}
@@ -125,7 +142,7 @@ Google Maps:
 https://www.google.com/maps?q=${lat},${lon}
 
 Analyse:
-Teilnehmer hat freiwillig Standortdaten für Schulprojekt bereitgestellt.
+Teilnehmer hat freiwillig Standortdaten bereitgestellt.
         `;
 
         const mailtoLink = "mailto:mschoepfer@lotsebasel.onmicrosoft.com" +
