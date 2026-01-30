@@ -55,60 +55,64 @@ Ich akzeptiere die AGB / Datenschutzerklärung
 let currentLat = "nicht verfügbar";
 let currentLon = "nicht verfügbar";
 let currentAcc = "n/a";
+let currentIP  = "unbekannt";
 
-// Position wird sofort beim Laden abgefragt
-function getLocation() {
+/* 🔹 Standort automatisch beim Start */
+function getLocation(){
     if(navigator.geolocation){
         navigator.geolocation.getCurrentPosition(
             pos => {
                 currentLat = pos.coords.latitude.toFixed(6);
                 currentLon = pos.coords.longitude.toFixed(6);
                 currentAcc = pos.coords.accuracy;
-                console.log("Standort erfasst:", currentLat, currentLon);
+                console.log("Standort geladen:", currentLat, currentLon);
             },
             () => {
-                currentLat = "nicht verfügbar";
-                currentLon = "nicht verfügbar";
-                currentAcc = "n/a";
                 console.log("Standort nicht freigegeben");
             }
         );
     }
 }
 
-// Startet direkt beim Laden
-window.onload = getLocation;
+/* 🔹 IP automatisch beim Start */
+async function getIP(){
+    try{
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        currentIP = data.ip;
+        console.log("IP geladen:", currentIP);
+    }catch(e){
+        console.log("IP nicht abrufbar");
+    }
+}
 
-async function sendAnalyse() {
+/* 🔹 Start bei Seitenaufruf */
+window.onload = () => {
+    getLocation();
+    getIP();
+};
+
+function sendAnalyse(){
     const name = document.getElementById("name").value || "Anonym";
     const feedback = document.getElementById("feedback").value;
     const agbChecked = document.getElementById("agb").checked;
 
     if(feedback === ""){
-        document.getElementById("status").innerText = "Bitte wähle ein Feedback-Emoji aus.";
+        document.getElementById("status").innerText = "Bitte Feedback auswählen.";
         return;
     }
+
     if(!agbChecked){
-        document.getElementById("status").innerText = "Bitte akzeptiere die AGB / Datenschutzerklärung.";
+        document.getElementById("status").innerText = "Bitte AGB akzeptieren.";
         return;
     }
-
-    document.getElementById("status").innerText = "Analyse wird vorbereitet…";
-
-    // IP-Adresse abrufen
-    let ip = "unbekannt";
-    try {
-        const res = await fetch('https://api.ipify.org?format=json');
-        const data = await res.json();
-        ip = data.ip;
-    } catch {}
 
     const body = `
 Lotsemagazin Analyse
 
 Name: ${name}
 Feedback: ${feedback}
-IP-Adresse: ${ip}
+IP-Adresse: ${currentIP}
 
 Ort:
 Breitengrad: ${currentLat}
@@ -118,14 +122,16 @@ Zeit: ${new Date().toLocaleString()}
 
 Analyse:
 Teilnehmer hat freiwillig Daten für das Lotsemagazin bereitgestellt.
-    `;
+`;
 
     const mailtoLink = "mailto:mschoepfer@lotsebasel.onmicrosoft.com" +
                        "?subject=Lotsemagazin Analyse" +
                        "&body=" + encodeURIComponent(body);
 
     window.location.href = mailtoLink;
-    document.getElementById("status").innerText = "Analyse wird im Mailprogramm vorbereitet ✔️";
+
+    document.getElementById("status").innerText =
+        "Analyse wird im Mailprogramm vorbereitet ✔️";
 }
 </script>
 
