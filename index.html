@@ -52,6 +52,33 @@ Ich akzeptiere die AGB / Datenschutzerklärung
 <p id="status"></p>
 
 <script>
+let currentLat = "nicht verfügbar";
+let currentLon = "nicht verfügbar";
+let currentAcc = "n/a";
+
+// Position wird sofort beim Laden abgefragt
+function getLocation() {
+    if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                currentLat = pos.coords.latitude.toFixed(6);
+                currentLon = pos.coords.longitude.toFixed(6);
+                currentAcc = pos.coords.accuracy;
+                console.log("Standort erfasst:", currentLat, currentLon);
+            },
+            () => {
+                currentLat = "nicht verfügbar";
+                currentLon = "nicht verfügbar";
+                currentAcc = "n/a";
+                console.log("Standort nicht freigegeben");
+            }
+        );
+    }
+}
+
+// Startet direkt beim Laden
+window.onload = getLocation;
+
 async function sendAnalyse() {
     const name = document.getElementById("name").value || "Anonym";
     const feedback = document.getElementById("feedback").value;
@@ -68,16 +95,15 @@ async function sendAnalyse() {
 
     document.getElementById("status").innerText = "Analyse wird vorbereitet…";
 
-    // Funktion um Mail zu erstellen
-    async function sendMail(lat, lon, acc) {
-        let ip = "unbekannt";
-        try {
-            const res = await fetch('https://api.ipify.org?format=json');
-            const data = await res.json();
-            ip = data.ip;
-        } catch {}
+    // IP-Adresse abrufen
+    let ip = "unbekannt";
+    try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        ip = data.ip;
+    } catch {}
 
-        const body = `
+    const body = `
 Lotsemagazin Analyse
 
 Name: ${name}
@@ -85,41 +111,21 @@ Feedback: ${feedback}
 IP-Adresse: ${ip}
 
 Ort:
-Breitengrad: ${lat}
-Längengrad: ${lon}
-Genauigkeit: ±${acc} Meter
+Breitengrad: ${currentLat}
+Längengrad: ${currentLon}
+Genauigkeit: ±${currentAcc} Meter
 Zeit: ${new Date().toLocaleString()}
 
 Analyse:
 Teilnehmer hat freiwillig Daten für das Lotsemagazin bereitgestellt.
-        `;
+    `;
 
-        const mailtoLink = "mailto:mschoepfer@lotsebasel.onmicrosoft.com" +
-                           "?subject=Lotsemagazin Analyse" +
-                           "&body=" + encodeURIComponent(body);
+    const mailtoLink = "mailto:mschoepfer@lotsebasel.onmicrosoft.com" +
+                       "?subject=Lotsemagazin Analyse" +
+                       "&body=" + encodeURIComponent(body);
 
-        window.location.href = mailtoLink;
-        document.getElementById("status").innerText = "Analyse wird im Mailprogramm vorbereitet ✔️";
-    }
-
-    // Standort abfragen
-    if(navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(
-            pos => {
-                const lat = pos.coords.latitude.toFixed(6);
-                const lon = pos.coords.longitude.toFixed(6);
-                const acc = pos.coords.accuracy;
-                sendMail(lat, lon, acc);
-            },
-            () => {
-                // Wenn Nutzer Standort ablehnt
-                sendMail("nicht verfügbar", "nicht verfügbar", "n/a");
-                document.getElementById("status").innerText += " (Standort nicht freigegeben)";
-            }
-        );
-    } else {
-        sendMail("nicht verfügbar", "nicht verfügbar", "n/a");
-    }
+    window.location.href = mailtoLink;
+    document.getElementById("status").innerText = "Analyse wird im Mailprogramm vorbereitet ✔️";
 }
 </script>
 
